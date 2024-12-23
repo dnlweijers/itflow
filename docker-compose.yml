@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+  itflow:
+    hostname: itflow
+    container_name: itflow
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on: 
+      - itflow-db
+    networks:
+      - apps_network
+    ports:
+      - "86:8080"
+    environment:
+      - TZ=Europe/Amsterdam
+      - ITFLOW_NAME=ITFlow
+      - ITFLOW_SERVER_NAME=itflow.dnlweijers.nl
+      - ITFLOW_URL=https://itflow.dnlweijers.nl
+      - ITFLOW_PORT=8080
+      - ITFLOW_REPO=github.com/itflow-org/itflow
+      - ITFLOW_REPO_BRANCH=master
+      - ITFLOW_LOG_LEVEL=info
+      - ITFLOW_DB_HOST=itflow-db
+      - ITFLOW_DB_PASS=oS4XpMxq1f5cdD
+    volumes:
+      - /data/itflow/:/var/www/html
+      - ./php-config:/etc/php/8.3/apache2
+      - ./webroot:/var/www/html
+    healthcheck:
+      test: ["CMD", "curl", "-f", "https://itflow.dnlweijers.nl"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  itflow-db:
+    hostname: itflow-db
+    container_name: itflow-db
+    image: mariadb:10.6.11
+    restart: always
+    networks:
+      - apps_network
+    environment:
+      - MARIADB_RANDOM_ROOT_PASSWORD=true
+      - MARIADB_DATABASE=itflow
+      - MARIADB_USER=itflow
+      - MARIADB_PASSWORD=oS4XpMxq1f5cdD
+    volumes:
+      - /data/itflow/itflow-db:/var/lib/mysql/
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "itflow", "-p${MARIADB_PASSWORD}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  apps_network:
+    external: true
