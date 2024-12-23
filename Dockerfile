@@ -1,12 +1,17 @@
 FROM php:8.3-apache
 
-# Installeer vereiste tools en PHP-extensies
+# Voeg repository en tools toe
 RUN apt-get update && apt-get install -y \
     lsb-release \
     gnupg \
-    wget \
-    php8.3-mysql \
+    wget && \
+    echo "deb https://packages.sury.org/php/ $(lsb-release -sc) main" > /etc/apt/sources.list.d/php.list && \
+    wget -qO - https://packages.sury.org/php/apt.gpg | apt-key add -
+
+# Installeer PHP-extensies en andere benodigde pakketten
+RUN apt-get update && apt-get install -y \
     php8.3-common \
+    php8.3-mysql \
     php8.3-opcache \
     php8.3-soap \
     php8.3-xml \
@@ -16,13 +21,3 @@ RUN apt-get update && apt-get install -y \
     dnsutils \
     git && \
     apt-get clean
-
-# Voeg de PHP-configuratie aan
-RUN echo "upload_max_filesize = 500M" >> /usr/local/etc/php/php.ini
-RUN echo "post_max_size = 500M" >> /usr/local/etc/php/php.ini
-
-# Voeg een entrypoint-script toe om configuraties te laden
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
-
-CMD ["/usr/local/bin/entrypoint.sh"]
