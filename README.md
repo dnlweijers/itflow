@@ -22,5 +22,5 @@ Deze repository bevat de configuratiebestanden om ITFlow te implementeren met Do
 ### 1. Repository klonen
 Kloon de repository naar je lokale machine:
 ```bash
-git clone https://github.com/username/itflow-docker.git
+git clone https://github.com/dnlweijers/itflow.git
 cd itflow-docker
